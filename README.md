@@ -1,4 +1,4 @@
-# NumPy & Pandas Data Projects
+# NumPy & Pandas Small Projects
 
 A collection of data analysis and preprocessing projects built with NumPy and Pandas — taking messy, real-world-style datasets and transforming them into clean, ML-ready data through practical exercises.
 
