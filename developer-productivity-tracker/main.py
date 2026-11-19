@@ -5,30 +5,48 @@ np.random.seed(42)
 
 # Developer profiles
 dev_profiles = pd.DataFrame({
-    "user_id": ["U01", "U02", "U03", "U04", "U05", "U02"],
-    "name": ["Aafia", "Aaryaan", "Jazib", "Zoya", None, "Aaryaan"],
-    "age": [23, 21, 24, None, 22, 21],
-    "grade": ["A", "B", "C", "A", "B", "B"]
+    "user_id": ["U01", "U02", "U03", "U04", "U05"],
+    "name": ["Alex", "Sam", "Jordan", "Taylor", "Casey"],
+    "age": [22, None, 20, 23, 21],
+    "grade": ["A", "B", "C", "A", "B"]
 })
 
 # Daily logs
 logs = pd.DataFrame({
-    "user_id": ["U01", "U02", "U03", "U01", "U05", "U04", "U06"],
-    "hours_coded": [5, None, 2, 6, 3, 4, 8],
-    "hours_slept": [7, 6, 5, 8, None, 4, 6],
-    "bugs_fixed": [12, 7, 5, 14, 9, 3, 11],
-    "log_date": pd.date_range("2024-01-01", periods=7)
+    "user_id": ["U01", "U02", "U01", "U03", "U05", "U04", "U03", "U06"],
+    "hours_coded": [5, 3, None, 2, 4, 8, 1, 6],
+    "hours_slept": [7, 6, 8, np.nan, 6, 5, 7, 4],
+    "bugs_fixed": [12, 7, 14, 5, 9, 20, 3, 16],
+    "log_date": pd.date_range("2024-01-01", periods=8, freq="D")
 })
 
-print(f"\n first 5 rows of dev profiles: {dev_profiles.head()} ")
-print(f"\n first 5 rows of logs: {logs.head()} ")
+print(f"\n first three rows of dev_profile: {dev_profiles.head(3)}")
+print(f"\n last three rows of dev_profile: {dev_profiles.tail(3)}")
+print(f"\n first three rows of logs {logs.head(3)}")
+print(f"\n last three rows of dev_profile: {logs.tail(3)}")
 
-print(f"\n last 5 rows of dev profiles: {dev_profiles.tail()} ")
-print(f"\n last 5 rows of logs: {logs.tail()} ")
+print("\n information of dev_profile:")
+dev_profiles.info()
+print("\n information of logs:")
+logs.info()
 
-dev_profiles = dev_profiles.dropna(subset="name")
+print(f"\n summary stats of developer profiles: {dev_profiles.describe()}")
+print(f"\n summary stats of logs: {logs.describe()}")
+
+print(f"\n the shape of developer profile: {dev_profiles.shape}")
+print(f"\n the shape of logs: {logs.shape}")
+
+print(f"\n columns info of developer profile: {dev_profiles.columns}")
+print(f"\n columns info of logs: {logs.columns}")
+
+print(f"\n the data types of developer profile: {dev_profiles.dtypes}")
+print(f"\n the data types info of logs: {logs.dtypes}")
+
+print(f"\n the index of developer profile: {dev_profiles.index}")
+print(f"\n the index info of logs: {logs.index}")
+
 dev_profiles = dev_profiles.dropna(subset="user_id")
-
+dev_profiles = dev_profiles.dropna(subset="name")
 logs = logs.dropna(subset="user_id")
 
 dev_profiles["age"] = dev_profiles["age"].fillna(dev_profiles["age"].mean())
@@ -37,7 +55,6 @@ logs["hours_coded"] = logs["hours_coded"].fillna(logs["hours_coded"].mean())
 logs["hours_slept"] = logs["hours_slept"].fillna(logs["hours_slept"].mean())
 
 dev_profiles["grade"] = dev_profiles["grade"].astype("category")
-
 logs["log_date"] = pd.to_datetime(logs["log_date"])
 
 dev_profiles = dev_profiles.drop_duplicates()
@@ -48,10 +65,10 @@ print(f"\n {merge}")
 
 logs["productivity"] = logs["bugs_fixed"] / logs["hours_coded"]
 
-logs["statues"] = logs["bugs_fixed"].apply(lambda x: "pass" if x >= 10 else "fail")
+logs["status"] = logs["bugs_fixed"].apply(lambda x: "pass" if x >= 10 else "fail")
 
-logs["sleep_band"] = pd.cut(logs["hours_slept"], bins=[3, 5, 7, 9], labels=["low", "mid", "high"])
-logs["bug_level"] = pd.qcut(logs["bugs_fixed"], q=3, labels=["low", "mid", "high"])
+logs["sleep_band"] = pd.cut(logs["hours_slept"], bins=[4,6,7,8], labels=["low","mid","high"])
+logs["bug_q"] = pd.qcut(logs["bugs_fixed"], q=3, labels=["low","mid","high"])
 
 grading = {"A": 4,
            "B": 3,
@@ -59,36 +76,47 @@ grading = {"A": 4,
 
 dev_profiles["grade_num"] = dev_profiles["grade"].map(grading)
 
-merge = merge.set_index("name")
+filtering = (logs["bugs_fixed"] > 10) & (logs["hours_slept"] < 6)
+print(f"\n Devs who fixed >10 bugs & slept <6 hrs:{logs[filtering]}")
 
-print(f"\n{merge.loc['Aaryaan']}")
-print(f"\n{merge.iloc[1]}")
+dev_profiles = dev_profiles.set_index("name")
+print(f"\n {dev_profiles.loc['Alex']}")
+print(f"\n {logs.iloc[2]}")
 
-filter =  (logs["hours_slept"] < 6) & (logs["bugs_fixed"] > 10) 
-print(f"\n{logs[filter]}")
+avg_bugs = merge.groupby("grade")["bugs_fixed"].mean()
+total_bugs = logs.groupby("sleep_band").agg({"bugs_fixed" :"sum"})
 
-mean_bugs = merge.groupby("grade")["bugs_fixed"].mean()
-total_bugs = logs.groupby("sleep_band")["bugs_fixed"].sum()
-merge["bugs_per_grade"] = merge.groupby("grade")["bugs_fixed"].transform("median")
+print(f"\n {avg_bugs}")
+print(f"\n{total_bugs}")
 
+merge["bugs_per_grade"] = (
+    merge.groupby("grade")["bugs_fixed"].transform("median")
+)
 
-pivot  = pd.pivot_table(logs, index="user_id", columns="sleep_band", values="hours_coded", aggfunc="mean")
+pivot = pd.pivot_table(logs, index = "user_id", columns="sleep_band", values="hours_coded", aggfunc = "mean")
 print(f"\n{pivot}")
 
 melt = pivot.reset_index().melt(id_vars="user_id",value_name="hours_coded")
+print(f"\n{melt}")
+
 dummies = pd.get_dummies(logs["sleep_band"])
-category_ = logs["sleep_band"].astype("category").cat.codes
+print(f"\n{dummies}")
 
-print(F"\n{category_}")
+category = logs["sleep_band"].astype("category").cat.codes
+print(f"\n{category}")
 
-logs["rolling"] = logs["bugs_fixed"].rolling(window=3).mean()
-logs["exp_avg"] = logs["bugs_fixed"].ewm(alpha=0.2).mean()
-
-X = logs[["hours_coded","hours_slept"]]
+X = logs[["hours_coded", "productivity"]]
 y = logs["bugs_fixed"]
 
 X.to_csv("Xdata.csv", index=False)
-y.to_csv("Ydata.csv" ,index=False)
-print(f"\n{logs}")
-print(f"\n {merge}")
+y.to_csv("ydata.csv", index=False)
 
+rolling = logs["bugs_fixed"].rolling(window=3).mean()
+exp_wei_mean = logs["bugs_fixed"].ewm(alpha=0.2).mean()
+
+print(f"\n{rolling}")
+print(f"\n{exp_wei_mean}")
+print(f"\n {logs}")
+
+print(f"\n{merge}")
+print(f"\n {dev_profiles}")
