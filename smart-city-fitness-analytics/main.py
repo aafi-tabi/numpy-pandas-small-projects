@@ -135,7 +135,7 @@ def update_step(data):
         data_.iternext()
     
 update_ = update_step(data)
-print(f" data after updating steps: {update_}")
+print(f" data after updating steps: {data}")
 
 
 def health_score(data):
@@ -152,10 +152,3 @@ def best_health_score(health_score,data):
 
     
 best_health_score_ = best_health_score(health_score_,data)
-    
-    
-
-    
-    
-    
-
