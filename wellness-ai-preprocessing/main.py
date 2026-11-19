@@ -103,23 +103,25 @@ print(f"data before making change in copy: {data}")
 data_copy[:,:,0] =70
 print(f"data after making change in copy: {data}")
 
+calories_backup = data[:,:,3].copy()
 data_view = data.view()
 print(f"data before making change in view: {data}")
 data_view[:,:,3] = 9999
 print(f"data after making change in view: {data}")
+data[:,:,3] = calories_backup
 
 data__ = np.nditer(data, flags=['multi_index'],op_flags=['readwrite'])
 while not data__.finished:
     index_ = data__.multi_index
     value_ = data__[0]
-    sleep = data[index_[0], index_[1], 1] 
-    if sleep > 4000:
+    steps_value = data[index_[0], index_[1], 1] 
+    if index_[2] == 3 and steps_value > 4000:
         data[index_[0], index_[1], 3] -= 500
     data__.iternext()
 
 data[:,:,2][data[:,:,2] > 9] = 9.0
 
-avg_sleep = np.sum(data[:,:,2], axis=1)
+avg_sleep = np.mean(data[:,:,2], axis=1)
 print(f"average sleep per user: {avg_sleep}")
 
 sum_calories = np.sum(data[:,:,3], axis=0)
@@ -127,7 +129,3 @@ print(f" sum of calories of all users per day: {sum_calories}")
 
 high_steps = np.argmax(data[:,:,1], axis=1)
 print(f"day per user with high number of steps: {high_steps}")
-
-
-    
-
