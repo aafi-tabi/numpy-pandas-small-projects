@@ -6,7 +6,7 @@ np.random.seed(42)
 # Developer profiles
 dev_profiles = pd.DataFrame({
     "user_id": ["U01", "U02", "U03", "U04", "U05"],
-    "name": ["Zoya", "Tariq", "Aaryaan", "Aafia", "Zain"],
+    "name": ["Alex", "Sam", "Jordan", "Taylor", "Casey"],
     "age": [22, None, 20, 23, 21],
     "grade": ["A", "B", "C", "A", "B"]
 })
@@ -25,8 +25,10 @@ print(f"\n last three rows of dev_profile: {dev_profiles.tail(3)}")
 print(f"\n first three rows of logs {logs.head(3)}")
 print(f"\n last three rows of dev_profile: {logs.tail(3)}")
 
-print(f"\n information of dev_profile: {dev_profiles.info()}")
-print(f"\n information of logs: {logs.info()}")
+print("\n information of dev_profile:")
+dev_profiles.info()
+print("\n information of logs:")
+logs.info()
 
 print(f"\n summary stats of developer profiles: {dev_profiles.describe()}")
 print(f"\n summary stats of logs: {logs.describe()}")
@@ -78,7 +80,7 @@ filtering = (logs["bugs_fixed"] > 10) & (logs["hours_slept"] < 6)
 print(f"\n Devs who fixed >10 bugs & slept <6 hrs:{logs[filtering]}")
 
 dev_profiles = dev_profiles.set_index("name")
-print(f"\n {dev_profiles.loc["Zoya"]}")
+print(f"\n {dev_profiles.loc['Alex']}")
 print(f"\n {logs.iloc[2]}")
 
 avg_bugs = merge.groupby("grade")["bugs_fixed"].mean()
@@ -118,4 +120,3 @@ print(f"\n {logs}")
 
 print(f"\n{merge}")
 print(f"\n {dev_profiles}")
-
